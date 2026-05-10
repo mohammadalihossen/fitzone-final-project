@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // useEffect যোগ করা হয়েছে
 import { useRouter } from 'next/navigation';
 import useCartStore from '@/store/cartStore';
 import useAuthStore from '@/store/authStore';
@@ -31,6 +31,13 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('COD');
   const [placing, setPlacing] = useState(false);
   const [success, setSuccess] = useState(null);
+
+  // ১. সরাসরি router.push ব্যবহার না করে useEffect এর মাধ্যমে করা ভালো
+  useEffect(() => {
+    if (items.length === 0 && !success) {
+      router.push('/cart');
+    }
+  }, [items, success, router]);
 
   const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -71,17 +78,14 @@ export default function CheckoutPage() {
     );
   }
 
-  if (items.length === 0) {
-    router.push('/cart');
-    return null;
-  }
+ 
+  if (items.length === 0) return null;
 
   return (
     <div className="pt-20 max-w-7xl mx-auto px-4 py-10">
       <h1 className="section-title mb-8">CHECKOUT</h1>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Shipping Form */}
         <div className="lg:col-span-2 space-y-6">
           <div className="card p-6">
             <h2 className="font-heading font-700 uppercase text-sm tracking-wider text-white mb-6">Shipping Address</h2>
@@ -109,7 +113,6 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Payment Method */}
           <div className="card p-6">
             <h2 className="font-heading font-700 uppercase text-sm tracking-wider text-white mb-6">Payment Method</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -131,7 +134,6 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* Order Summary */}
         <div>
           <div className="card p-6 sticky top-24">
             <h2 className="font-heading font-700 uppercase text-sm tracking-wider text-white mb-6">Order Summary</h2>

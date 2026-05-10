@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react'; 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { productAPI } from '@/services/api';
 import ProductCard from '@/components/product/ProductCard';
@@ -27,7 +27,8 @@ function SkeletonCard() {
   );
 }
 
-export default function ProductsPage() {
+
+function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -79,7 +80,6 @@ export default function ProductsPage() {
 
   return (
     <div className="pt-20 max-w-7xl mx-auto px-4 py-10">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="section-title mb-2">ALL PRODUCTS</h1>
         {pagination.total && (
@@ -87,7 +87,6 @@ export default function ProductsPage() {
         )}
       </div>
 
-      {/* Search + Sort Bar */}
       <div className="flex flex-col md:flex-row gap-4 mb-8">
         <div className="relative flex-1">
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
@@ -122,7 +121,6 @@ export default function ProductsPage() {
       </div>
 
       <div className="flex gap-8">
-        {/* Filter Sidebar */}
         <aside className={`${filterOpen ? 'block' : 'hidden'} md:block w-full md:w-64 shrink-0`}>
           <div className="card p-6 sticky top-24">
             <div className="flex items-center justify-between mb-6">
@@ -134,7 +132,6 @@ export default function ProductsPage() {
               )}
             </div>
 
-            {/* Category */}
             <div className="mb-6">
               <h4 className="text-muted text-xs uppercase tracking-widest font-600 mb-3">Category</h4>
               <div className="space-y-2">
@@ -156,7 +153,6 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* Brand */}
             {brands.length > 0 && (
               <div className="mb-6">
                 <h4 className="text-muted text-xs uppercase tracking-widest font-600 mb-3">Brand</h4>
@@ -172,7 +168,6 @@ export default function ProductsPage() {
               </div>
             )}
 
-            {/* Price Range */}
             <div>
               <h4 className="text-muted text-xs uppercase tracking-widest font-600 mb-3">Price Range (৳)</h4>
               <div className="flex gap-2">
@@ -195,7 +190,6 @@ export default function ProductsPage() {
           </div>
         </aside>
 
-        {/* Products Grid */}
         <div className="flex-1">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -213,7 +207,6 @@ export default function ProductsPage() {
                 {products.map(p => <ProductCard key={p._id} product={p} />)}
               </div>
 
-              {/* Pagination */}
               {pagination.pages > 1 && (
                 <div className="flex justify-center gap-2 mt-12">
                   {Array.from({ length: pagination.pages }, (_, i) => i + 1).map(page => (
@@ -236,5 +229,14 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="pt-40 text-center text-white">Loading products...</div>}>
+      <ProductsContent />
+    </Suspense>
   );
 }
