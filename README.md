@@ -1,4 +1,4 @@
-# 💪 FitZone — Premium Fitness eCommerce Platform
+# 💪 FitZone — Fitness eCommerce Platform
 
 > Bangladesh's #1 fitness equipment store built with the MERN stack (MongoDB, Express, Next.js, Node.js)
 
