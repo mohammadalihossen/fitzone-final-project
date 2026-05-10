@@ -27,26 +27,37 @@ function SkeletonCard() {
   );
 }
 
-
 function ProductsContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-
   const [products, setProducts] = useState([]);
   const [brands, setBrands] = useState([]);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(true);
   const [filterOpen, setFilterOpen] = useState(false);
 
+  
   const [filters, setFilters] = useState({
-    search: searchParams.get('search') || '',
-    category: searchParams.get('category') || '',
-    brand: searchParams.get('brand') || '',
-    minPrice: searchParams.get('minPrice') || '',
-    maxPrice: searchParams.get('maxPrice') || '',
-    sort: searchParams.get('sort') || '-createdAt',
+    search: '',
+    category: '',
+    brand: '',
+    minPrice: '',
+    maxPrice: '',
+    sort: '-createdAt',
     page: 1,
   });
+
+ 
+  useEffect(() => {
+    setFilters({
+      search: searchParams.get('search') || '',
+      category: searchParams.get('category') || '',
+      brand: searchParams.get('brand') || '',
+      minPrice: searchParams.get('minPrice') || '',
+      maxPrice: searchParams.get('maxPrice') || '',
+      sort: searchParams.get('sort') || '-createdAt',
+      page: 1,
+    });
+  }, [searchParams]);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -65,7 +76,9 @@ function ProductsContent() {
     }
   }, [filters]);
 
-  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+  useEffect(() => { 
+    fetchProducts(); 
+  }, [fetchProducts]);
 
   const updateFilter = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
@@ -231,7 +244,6 @@ function ProductsContent() {
     </div>
   );
 }
-
 
 export default function ProductsPage() {
   return (

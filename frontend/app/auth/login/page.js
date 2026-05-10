@@ -1,27 +1,32 @@
 'use client';
-import { useState, Suspense } from 'react'; 
+import { useState, useEffect, Suspense } from 'react'; 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import useAuthStore from '@/store/authStore';
 import { toast } from 'react-hot-toast';
 import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
 
-
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/';
   const { login, isLoading } = useAuthStore();
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPass, setShowPass] = useState(false);
   const [focused, setFocused] = useState('');
+  const [redirectPath, setRedirectPath] = useState('/'); 
+  
+
+  useEffect(() => {
+    const path = searchParams.get('redirect') || '/';
+    setRedirectPath(path);
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await login(form);
     if (result.success) {
       toast.success('Welcome back! 💪');
-      router.push(redirect);
+      router.push(redirectPath);
     } else {
       toast.error(result.error);
     }
@@ -130,7 +135,6 @@ function LoginContent() {
   );
 }
 
-
 export default function LoginPage() {
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4">
@@ -145,7 +149,7 @@ export default function LoginPage() {
       </div>
 
       <div className="relative z-10 w-full max-w-md">
-        <Suspense fallback={<div className="text-white text-center">Loading...</div>}>
+        <Suspense fallback={<div className="text-white text-center">Loading login form...</div>}>
           <LoginContent />
         </Suspense>
       </div>
