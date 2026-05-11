@@ -1,225 +1,212 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { adminAPI } from '@/services/api';
-import {
-  FiShoppingBag, FiUsers, FiPackage, FiAlertTriangle,
-  FiDollarSign, FiTrendingUp, FiArrowUp, FiArrowRight,
-  FiClock, FiCheckCircle, FiTruck, FiXCircle
-} from 'react-icons/fi';
+import { productAPI } from '@/services/api';
+import ProductCard from '@/components/product/ProductCard';
+import { FiArrowRight, FiShield, FiTruck, FiStar, FiHeadphones } from 'react-icons/fi';
 
-const formatPrice = (p) => `৳${Number(p || 0).toLocaleString('en-BD')}`;
+const categories = [
+  { name: 'Barbells', image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop', slug: 'Barbells' },
+  { name: 'Benches', image: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400&h=300&fit=crop', slug: 'Benches' },
+  { name: 'Cardio', image: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=300&fit=crop', slug: 'Cardio' },
+  { name: 'Dumbbells', image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=300&fit=crop', slug: 'Dumbbells' },
+  // আরও যতগুলো চাও রাখতে পারো
+];
 
-const STATUS_CONFIG = {
-  pending:    { color: 'text-yellow-400', bg: 'bg-yellow-400/10', border: 'border-yellow-400/30' },
-  confirmed:  { color: 'text-blue-400',   bg: 'bg-blue-400/10',   border: 'border-blue-400/30' },
-  processing: { color: 'text-blue-400',   bg: 'bg-blue-400/10',   border: 'border-blue-400/30' },
-  shipped:    { color: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/30' },
-  delivered:  { color: 'text-primary',    bg: 'bg-primary/10',    border: 'border-primary/30' },
-  cancelled:  { color: 'text-red-400',    bg: 'bg-red-400/10',    border: 'border-red-400/30' },
-};
+const features = [
+  { icon: FiTruck, title: 'Free Shipping', desc: 'Orders over BDT 5,000' },
+  { icon: FiShield, title: '2 Year Warranty', desc: 'All products' },
+  { icon: FiHeadphones, title: '24/7 Support', desc: 'Expert help' },
+  { icon: FiStar, title: 'Secure Payment', desc: '100% Safe' },
+];
 
-function StatCard({ icon: Icon, label, value, sub, color, bg }) {
-  return (
-    <div className="bg-dark-2 border border-border p-6 hover:border-primary/30 transition-all group">
-      <div className="flex items-start justify-between mb-4">
-        <div className={`w-12 h-12 ${bg} flex items-center justify-center`}>
-          <Icon className={color} size={22} />
-        </div>
-        <FiArrowUp className="text-primary opacity-0 group-hover:opacity-100 transition-opacity" size={16} />
-      </div>
-      <p className={`font-black text-3xl ${color} mb-1`}>{value}</p>
-      <p className="text-white font-semibold text-sm">{label}</p>
-      {sub && <p className="text-muted text-xs mt-1">{sub}</p>}
-    </div>
-  );
-}
-
-export default function AdminDashboard() {
-  const [analytics, setAnalytics] = useState(null);
+export default function HomePage() {
+  const [featured, setFeatured] = useState([]);
+  const [trending, setTrending] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    adminAPI.getAnalytics()
-      .then(d => { setAnalytics(d.analytics); setLoading(false); })
-      .catch(() => setLoading(false));
+    const fetchData = async () => {
+      try {
+        const [f, t] = await Promise.all([
+          productAPI.getAll({ featured: true, limit: 4 }),
+          productAPI.getAll({ trending: true, limit: 4 }),
+        ]);
+        setFeatured(f.products || []);
+        setTrending(t.products || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
-  if (loading) return (
-    <div className="space-y-6 animate-pulse">
-      <div className="h-8 bg-dark-3 w-64" />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array(4).fill(0).map((_, i) => <div key={i} className="h-36 bg-dark-2 border border-border" />)}
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {Array(4).fill(0).map((_, i) => <div key={i} className="h-64 bg-dark-2 border border-border" />)}
-      </div>
-    </div>
-  );
-
-  const { overview, orderStats, lowStockProducts, recentOrders, topProducts, revenueByMonth } = analytics || {};
-
-  const stats = [
-    { icon: FiDollarSign, label: 'Total Revenue', value: formatPrice(overview?.totalRevenue), sub: 'All time earnings', color: 'text-primary', bg: 'bg-primary/10' },
-    { icon: FiPackage, label: 'Total Orders', value: overview?.totalOrders || 0, sub: 'All orders', color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { icon: FiShoppingBag, label: 'Products', value: overview?.totalProducts || 0, sub: `${overview?.outOfStock || 0} out of stock`, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-    { icon: FiUsers, label: 'Customers', value: overview?.totalUsers || 0, sub: 'Registered users', color: 'text-orange-400', bg: 'bg-orange-400/10' },
-  ];
-
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-black text-white uppercase">Dashboard</h1>
-          <p className="text-muted text-sm mt-1">Welcome back, {analytics ? 'here\'s your store overview' : '...'}</p>
-        </div>
-        <Link href="/admin/products/new"
-          className="bg-primary text-black font-bold uppercase text-sm px-5 py-2.5 hover:bg-primary-dark transition-colors flex items-center gap-2">
-          + Add Product
-        </Link>
-      </div>
+    <div className="bg-[#0A0A0A] min-h-screen">
+      {/* HERO SECTION - Improved Mobile */}
+      <section className="relative overflow-hidden pt-16 pb-20 md:pt-24 md:pb-32">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#C8FF00_1px,transparent_1px)] [background-size:40px_40px]" />
+        
+        <div className="max-w-7xl mx-auto px-5 md:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
+            <div className="space-y-6 md:space-y-8">
+              <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 px-4 py-2 rounded-full">
+                <span className="text-primary text-sm font-semibold">🔥 NEW 2026 COLLECTION</span>
+              </div>
 
-      {/* Alerts */}
-      {(overview?.lowStockCount > 0 || overview?.outOfStock > 0) && (
-        <div className="flex flex-wrap gap-3">
-          {overview?.outOfStock > 0 && (
-            <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/30 px-4 py-3 flex-1">
-              <FiAlertTriangle className="text-red-400 shrink-0" size={18} />
-              <span className="text-red-400 text-sm font-semibold">{overview.outOfStock} products are out of stock</span>
-              <Link href="/admin/products" className="ml-auto text-red-300 text-xs underline shrink-0">Manage →</Link>
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tighter">
+                BUILD YOUR<br />
+                <span className="text-primary">DREAM GYM</span>
+              </h1>
+
+              <p className="text-lg md:text-xl text-gray-400 max-w-md">
+                Premium fitness equipment for home & commercial gyms in Bangladesh.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/products" className="btn-primary text-center text-base py-4 px-10">
+                  Shop Now
+                </Link>
+                <Link href="/products?featured=true" className="btn-outline text-center text-base py-4 px-10">
+                  Browse Featured
+                </Link>
+              </div>
+
+              {/* Stats */}
+              <div className="flex gap-8 pt-6">
+                {[['500+', 'Products'], ['10K+', 'Customers'], ['4.9', 'Rating']].map(([num, label]) => (
+                  <div key={label}>
+                    <p className="text-3xl font-black text-primary">{num}</p>
+                    <p className="text-xs uppercase tracking-widest text-gray-500">{label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          )}
-          {overview?.lowStockCount > 0 && (
-            <div className="flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/30 px-4 py-3 flex-1">
-              <FiAlertTriangle className="text-yellow-400 shrink-0" size={18} />
-              <span className="text-yellow-400 text-sm font-semibold">{overview.lowStockCount} products are running low</span>
+
+            {/* Hero Image - Mobile Friendly */}
+            <div className="relative flex justify-center md:justify-end">
+              <div className="relative w-72 h-72 md:w-96 md:h-96">
+                <div className="absolute inset-0 bg-primary/10 rounded-full animate-pulse" />
+                <div className="absolute inset-0 flex items-center justify-center text-[180px] md:text-[220px] drop-shadow-2xl">
+                  🏋️
+                </div>
+              </div>
             </div>
-          )}
+          </div>
         </div>
+      </section>
+
+      {/* CATEGORIES - Better Mobile Grid */}
+      <section className="max-w-7xl mx-auto px-5 py-12 md:py-16">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="section-title text-3xl md:text-4xl">Shop by Category</h2>
+          <p className="text-gray-400 mt-2">Find equipment for every fitness goal</p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-8 gap-4">
+          {categories.map((cat) => (
+            <Link
+              key={cat.name}
+              href={`/products?category=${cat.slug}`}
+              className="group relative overflow-hidden rounded-2xl aspect-square shadow-lg"
+            >
+              <img
+                src={cat.image}
+                alt={cat.name}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+              <div className="absolute bottom-4 left-0 right-0 text-center">
+                <p className="text-white font-semibold text-sm md:text-base tracking-wide">{cat.name}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* FEATURED PRODUCTS */}
+      <section className="max-w-7xl mx-auto px-5 py-8 md:py-16">
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h2 className="section-title text-3xl md:text-4xl">Featured Products</h2>
+            <p className="text-gray-400">Premium picks for serious lifters</p>
+          </div>
+          <Link href="/products?featured=true" className="hidden md:flex items-center gap-2 text-primary hover:text-white transition-colors">
+            View All <FiArrowRight />
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {Array(4).fill(0).map((_, i) => (
+              <div key={i} className="h-80 bg-dark-2 rounded-2xl animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {featured.map((p) => (
+              <ProductCard key={p._id} product={p} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* FEATURES */}
+      <section className="bg-dark-2 border-y border-border py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            {features.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="space-y-3">
+                <div className="w-14 h-14 mx-auto bg-dark-3 border border-border rounded-2xl flex items-center justify-center">
+                  <Icon className="text-primary" size={28} />
+                </div>
+                <p className="font-semibold text-white">{title}</p>
+                <p className="text-sm text-gray-400">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TRENDING PRODUCTS */}
+      {trending.length > 0 && (
+        <section className="max-w-7xl mx-auto px-5 py-12 md:py-16">
+          <div className="flex justify-between items-end mb-8">
+            <div>
+              <h2 className="section-title text-3xl md:text-4xl">🔥 Trending Now</h2>
+              <p className="text-gray-400">Most loved by our customers</p>
+            </div>
+            <Link href="/products?trending=true" className="text-primary hover:text-white flex items-center gap-1">
+              View All <FiArrowRight />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {trending.map((p) => (
+              <ProductCard key={p._id} product={p} />
+            ))}
+          </div>
+        </section>
       )}
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map(s => <StatCard key={s.label} {...s} />)}
-      </div>
-
-      {/* Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* Recent Orders */}
-        <div className="bg-dark-2 border border-border">
-          <div className="flex items-center justify-between p-5 border-b border-border">
-            <h2 className="font-bold text-white uppercase text-sm tracking-wider">Recent Orders</h2>
-            <Link href="/admin/orders" className="text-primary text-xs font-semibold flex items-center gap-1 hover:gap-2 transition-all">
-              View All <FiArrowRight size={12} />
-            </Link>
-          </div>
-          <div className="divide-y divide-border">
-            {recentOrders?.length === 0 && (
-              <p className="text-muted text-sm text-center py-8">No orders yet</p>
-            )}
-            {recentOrders?.map(order => {
-              const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
-              return (
-                <div key={order._id} className="flex items-center justify-between p-4 hover:bg-dark-3/50 transition-colors">
-                  <div>
-                    <p className="text-primary font-bold text-sm">{order.orderNumber}</p>
-                    <p className="text-muted text-xs mt-0.5">{order.user?.name} • {order.items?.length} item(s)</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-white font-bold text-sm">{formatPrice(order.totalPrice)}</p>
-                    <span className={`text-xs font-bold uppercase px-2 py-0.5 ${cfg.bg} ${cfg.color} border ${cfg.border}`}>
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+      {/* NEWSLETTER */}
+      <section className="py-16 bg-dark-2 border-t border-border">
+        <div className="max-w-md mx-auto px-5 text-center">
+          <h2 className="text-3xl font-black mb-3">Stay in the Loop</h2>
+          <p className="text-gray-400 mb-8">Get exclusive offers and fitness tips</p>
+          
+          <div className="flex gap-3">
+            <input
+              type="email"
+              placeholder="Your email address"
+              className="input-field flex-1"
+            />
+            <button className="btn-primary whitespace-nowrap px-8">Subscribe</button>
           </div>
         </div>
-
-        {/* Low Stock */}
-        <div className="bg-dark-2 border border-border">
-          <div className="flex items-center justify-between p-5 border-b border-border">
-            <h2 className="font-bold text-white uppercase text-sm tracking-wider">Low Stock Alert</h2>
-            <Link href="/admin/products" className="text-primary text-xs font-semibold flex items-center gap-1 hover:gap-2 transition-all">
-              Manage <FiArrowRight size={12} />
-            </Link>
-          </div>
-          <div className="divide-y divide-border">
-            {lowStockProducts?.length === 0 && (
-              <p className="text-primary text-sm text-center py-8">✅ All products well stocked</p>
-            )}
-            {lowStockProducts?.map(p => (
-              <div key={p._id} className="flex items-center gap-4 p-4 hover:bg-dark-3/50 transition-colors">
-                <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-semibold line-clamp-1">{p.name}</p>
-                  <p className="text-muted text-xs">{p.brand} · {p.category}</p>
-                </div>
-                <div className="text-right shrink-0">
-                  <span className={`font-black text-lg ${p.stock <= 5 ? 'text-red-400' : 'text-yellow-400'}`}>
-                    {p.stock}
-                  </span>
-                  <p className="text-muted text-xs">left</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Top Selling */}
-        <div className="bg-dark-2 border border-border">
-          <div className="flex items-center justify-between p-5 border-b border-border">
-            <h2 className="font-bold text-white uppercase text-sm tracking-wider">Top Selling Products</h2>
-          </div>
-          <div className="divide-y divide-border">
-            {topProducts?.map((p, i) => (
-              <div key={p._id} className="flex items-center gap-4 p-4 hover:bg-dark-3/50 transition-colors">
-                <span className="font-black text-2xl text-border w-8 shrink-0">#{i + 1}</span>
-                {p.images?.[0]?.url && (
-                  <img src={p.images[0].url} alt={p.name}
-                    className="w-12 h-12 object-cover border border-border shrink-0" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-semibold line-clamp-1">{p.name}</p>
-                  <p className="text-muted text-xs">{p.totalSold} sold</p>
-                </div>
-                <p className="text-primary font-black shrink-0">{formatPrice(p.price)}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Order Status */}
-        <div className="bg-dark-2 border border-border">
-          <div className="p-5 border-b border-border">
-            <h2 className="font-bold text-white uppercase text-sm tracking-wider">Order Status Breakdown</h2>
-          </div>
-          <div className="p-5 space-y-3">
-            {orderStats?.map(stat => {
-              const cfg = STATUS_CONFIG[stat._id] || STATUS_CONFIG.pending;
-              const maxCount = Math.max(...(orderStats?.map(s => s.count) || [1]));
-              const pct = Math.round((stat.count / maxCount) * 100);
-              return (
-                <div key={stat._id}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className={`text-xs font-bold uppercase ${cfg.color}`}>{stat._id}</span>
-                    <div className="flex items-center gap-4 text-xs">
-                      <span className="text-muted">{stat.count} orders</span>
-                      <span className="text-white font-semibold">{formatPrice(stat.revenue)}</span>
-                    </div>
-                  </div>
-                  <div className="h-1.5 bg-dark-5 w-full">
-                    <div className={`h-full transition-all duration-500 ${cfg.color.replace('text-', 'bg-')}`}
-                      style={{ width: pct + '%' }} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      </section>
     </div>
   );
 }

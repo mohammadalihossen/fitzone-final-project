@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, 'Email is required'],
-    unique: true,
+    unique: true,           // এটাই যথেষ্ট
     lowercase: true,
     trim: true,
     match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email']
@@ -74,8 +74,8 @@ userSchema.methods.toJSON = function() {
   return obj;
 };
 
-// Indexes
-userSchema.index({ email: 1 });
-userSchema.index({ role: 1 });
+// ✅ Indexes (শুধু যেগুলো দরকার)
+userSchema.index({ role: 1 });           // এটা রাখতে পারো
+// userSchema.index({ email: 1 });     // ❌ এটা মুছে দাও
 
 module.exports = mongoose.model('User', userSchema);

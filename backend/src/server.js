@@ -14,24 +14,31 @@ const adminRoutes = require('./routes/admin.routes');
 
 const app = express();
 
-// Security Middleware
-app.use(helmet());
+// ✅ Updated CORS Configuration
 app.use(cors({
-  origin: 'https://fitzone-final-project.vercel.app', 
-  credentials: true
+  origin: [
+    'https://fitzone-final-project.vercel.app',   // Production
+    'http://localhost:3000',                      // Next.js Local
+    'http://127.0.0.1:3000',                      // Alternative local
+    'http://localhost:5173'                       // Vite (যদি থাকে)
+  ],
+  credentials: true,                // Important for cookies/token
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
+// Security & Other Middleware
+app.use(helmet());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
 
 // Rate Limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 100,
   message: { error: 'Too many requests, please try again later.' }
 });
 app.use('/api/', limiter);
-
-// Body Parser
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
 
 // Logging
 if (process.env.NODE_ENV === 'development') {
@@ -57,8 +64,9 @@ app.use((req, res) => {
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('🔥 Error:', err);
   res.status(err.status || 500).json({
+    success: false,
     error: err.message || 'Internal Server Error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
   });
@@ -71,7 +79,6 @@ const connectDB = async () => {
     console.log('✅ MongoDB Connected Successfully');
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error.message);
-    process.exit(1);
   }
 };
 
