@@ -9,12 +9,10 @@ const generateToken = (user) => {
   return jwt.sign(
     {
       id: user._id,
-      role: user.role   // 👈 IMPORTANT FIX
+      role: user.role   // 👈 MUST ADD
     },
     process.env.JWT_SECRET,
-    {
-      expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-    }
+    { expiresIn: '7d' }
   );
 };
 
