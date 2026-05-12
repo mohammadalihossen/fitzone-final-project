@@ -17,7 +17,7 @@ const categories = [
   { name: "Cardio", image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=300&h=200&fit=crop", slug: "Cardio" },
   { name: "Dumbbells", image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=300&h=200&fit=crop", slug: "Dumbbells" },
   { name: "Kettlebells", image: "https://images.unsplash.com/photo-1598971639058-fab3c3109a00?w=300&h=200&fit=crop", slug: "Accessories" },
-  { name: "Bands", image: "https://images.unsplash.com/photo-1620188526357-8f8b5a5e8b5a?w=300&h=200&fit=crop", slug: "Accessories" },
+  { name: "Bands", image: "https://images.pexels.com/photos/4397840/pexels-photo-4397840.jpeg?auto=compress&cs=tinysrgb&w=500&h=500&fit=crop", slug: "Accessories" },
   { name: "Plates", image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=300&h=200&fit=crop", slug: "Barbells" },
   { name: "Yoga", image: "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=300&h=200&fit=crop", slug: "Accessories" },
 ];
