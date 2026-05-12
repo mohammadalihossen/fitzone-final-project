@@ -57,6 +57,10 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'FitZone API is running 💪', timestamp: new Date() });
 });
 
+app.get('/', (req, res) => {
+  res.send('🚀 FitZone Backend Running Successfully');
+});
+
 // 404 Handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
