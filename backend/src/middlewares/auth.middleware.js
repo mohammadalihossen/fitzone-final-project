@@ -1,52 +1,80 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User.model');
 
-// Verify JWT Token
+
+// =========================
+// 🔐 GENERATE TOKEN
+// =========================
+const generateToken = (user) => {
+  return jwt.sign(
+    {
+      id: user._id,
+      role: user.role   // 👈 IMPORTANT FIX
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+    }
+  );
+};
+
+
+// =========================
+// 🔒 PROTECT MIDDLEWARE
+// =========================
 const protect = async (req, res, next) => {
   try {
     let token;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+    ) {
       token = req.headers.authorization.split(' ')[1];
     }
 
     if (!token) {
-      return res.status(401).json({ error: 'Access denied. No token provided.' });
+      return res.status(401).json({ error: 'No token provided' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
     const user = await User.findById(decoded.id).select('-password');
 
     if (!user || !user.isActive) {
-      return res.status(401).json({ error: 'User not found or deactivated.' });
+      return res.status(401).json({ error: 'User not found or inactive' });
     }
 
-    req.user = user;
+    req.user = user; // includes role from DB
     next();
+
   } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({ error: 'Invalid token.' });
-    }
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ error: 'Token expired. Please login again.' });
-    }
-    next(error);
+    return res.status(401).json({
+      error: 'Invalid or expired token'
+    });
   }
 };
 
-// Admin only middleware
+
+// =========================
+// 👑 ADMIN ONLY MIDDLEWARE
+// =========================
 const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next();
   } else {
-    res.status(403).json({ error: 'Access denied. Admin privileges required.' });
+    return res.status(403).json({
+      error: 'Admin access required'
+    });
   }
 };
 
-// Generate JWT Token
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-  });
-};
 
-module.exports = { protect, adminOnly, generateToken };
+// =========================
+// 🚀 EXPORT
+// =========================
+module.exports = {
+  generateToken,
+  protect,
+  adminOnly
+};
