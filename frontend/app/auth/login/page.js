@@ -125,9 +125,12 @@ function LoginContent() {
         </button>
       </form>
 
-      <p className="text-center text-muted text-sm mt-7">
-        Don't have an account?{' '}
-        <Link href="/auth/register" className="text-primary font-semibold hover:underline">
+      <p className="text-center text-muted/70 text-xs mt-7 font-light">
+        Don't have an account?{" "}
+        <Link
+          href="/auth/register"
+          className="text-primary/90 font-medium hover:underline ml-1"
+        >
           Create one free →
         </Link>
       </p>
