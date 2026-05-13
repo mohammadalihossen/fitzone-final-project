@@ -14,25 +14,22 @@ const adminRoutes = require('./routes/admin.routes');
 
 const app = express();
 
-// ✅ Updated CORS Configuration
 app.use(cors({
   origin: [
-    'https://fitzone-final-project.vercel.app',   // Production
-    'http://localhost:3000',                      // Next.js Local
-    'http://127.0.0.1:3000',                      // Alternative local
-    'http://localhost:5173'                       // Vite (যদি থাকে)
+    'https://fitzone-final-project.vercel.app',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5173'
   ],
-  credentials: true,                // Important for cookies/token
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
-// Security & Other Middleware
 app.use(helmet());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Rate Limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -40,7 +37,6 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
@@ -52,6 +48,10 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 
+// Seed Route
+const seedRoutes = require('./routes/seed.routes');
+app.use('/api/seed', seedRoutes);
+
 // Health Check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'FitZone API is running 💪', timestamp: new Date() });
@@ -61,12 +61,10 @@ app.get('/', (req, res) => {
   res.send('🚀 FitZone Backend Running Successfully');
 });
 
-// 404 Handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Global Error Handler
 app.use((err, req, res, next) => {
   console.error('🔥 Error:', err);
   res.status(err.status || 500).json({
@@ -76,7 +74,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// MongoDB Connection
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
