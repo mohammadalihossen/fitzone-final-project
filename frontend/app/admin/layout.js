@@ -25,10 +25,23 @@ export default function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated || user?.role !== 'admin') router.push('/');
-  }, [isAuthenticated, user, router]);
+  if (!isAuthenticated) {
+    router.push('/auth/login');
+    return;
+  }
+  if (user?.role !== 'admin') {
+    router.push('/dashboard');
+    return;
+  }
+}, [isAuthenticated, user, router]);
 
-  if (!isAuthenticated || user?.role !== 'admin') return null;
+if (!isAuthenticated || !user) return (
+  <div className="min-h-screen flex items-center justify-center" style={{ background: '#1a1f2e' }}>
+    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
+if (user?.role !== 'admin') return null;
 
   return (
     <>
