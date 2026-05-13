@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import OfferPopup from '@/components/ui/OfferPopup';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const barlowCondensed = Barlow_Condensed({
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
       <body className="bg-dark min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1">{children}</main>
+        <OfferPopup />
         <Footer />
         <Toaster
           position="top-right"
@@ -44,5 +46,8 @@ export default function RootLayout({ children }) {
         />
       </body>
     </html>
+    
+    
+    
   );
 }
