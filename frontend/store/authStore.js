@@ -54,7 +54,7 @@ const useAuthStore = create(
       },
     }),
     {
-      name: 'fitzone-auth',
+      name: 'fitzone-auth-v2',
       partialize: (state) => ({ user: state.user, token: state.token, isAuthenticated: state.isAuthenticated }),
     }
   )
