@@ -5,27 +5,17 @@ import { usePathname, useRouter } from 'next/navigation';
 import useAuthStore from '@/store/authStore';
 import {
   FiGrid, FiPackage, FiShoppingBag, FiUsers,
-  FiMenu, FiX, FiChevronRight, FiPlus,
-  FiLogOut, FiHome, FiBell, FiSettings
+  FiPlus, FiLogOut, FiMenu, FiX, FiActivity,
+  FiBell, FiExternalLink, FiFileText, FiLayers
 } from 'react-icons/fi';
 
-const navGroups = [
-  {
-    label: null,
-    items: [
-      { href: '/admin', label: 'Dashboard', icon: FiGrid, exact: true },
-      { href: '/admin/orders', label: 'Orders', icon: FiPackage },
-      { href: '/admin/products', label: 'Products', icon: FiShoppingBag },
-      { href: '/admin/users', label: 'Users', icon: FiUsers },
-    ]
-  },
-  {
-    label: 'MANAGE',
-    items: [
-      { href: '/admin/products/new', label: 'Add Product', icon: FiPlus },
-      { href: '/', label: 'View Store', icon: FiHome },
-    ]
-  },
+// সাইডবার মেনু আইটেমসমূহ
+const navItems = [
+  { href: '/admin/products', label: 'Product Inventory', icon: FiShoppingBag },
+  { href: '/admin/products/new', label: 'Add New Product', icon: FiPlus },
+  { href: '/admin/orders', label: 'Order Management', icon: FiPackage },
+  { href: '/admin/users', label: 'User Analytics', icon: FiUsers },
+  { href: '/admin/reports', label: 'Sales Reports', icon: FiFileText },
 ];
 
 export default function AdminLayout({ children }) {
@@ -33,155 +23,138 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-    if (!isAuthenticated) {
-      router.push('/auth/login');
-      return;
-    }
-    if (user?.role !== 'admin') {
-      router.push('/dashboard');
-      return;
-    }
-  }, [mounted, isAuthenticated, user, router]);
-
-  // Loading state — Zustand hydrate হওয়া পর্যন্ত অপেক্ষা
-  if (!mounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#1a1f2e' }}>
-        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#C8FF00', borderTopColor: 'transparent' }} />
-      </div>
-    );
+  if (!isAuthenticated) {
+    router.push('/auth/login');
+    return;
   }
-
-  if (!isAuthenticated || user?.role !== 'admin') {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#1a1f2e' }}>
-        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#C8FF00', borderTopColor: 'transparent' }} />
-      </div>
-    );
+  if (user?.role !== 'admin') {
+    router.push('/dashboard');
+    return;
   }
+}, [isAuthenticated, user, router]);
 
-  const currentPage = navGroups.flatMap(g => g.items).find(n =>
-    n.exact ? pathname === n.href : (pathname.startsWith(n.href) && n.href !== '/')
-  );
+if (!isAuthenticated || !user) return (
+  <div className="min-h-screen flex items-center justify-center" style={{ background: '#1a1f2e' }}>
+    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
+if (user?.role !== 'admin') return null;
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#f0f2f5' }}>
-      {/* SIDEBAR */}
-      <aside className={`
-        fixed top-0 left-0 h-full z-40 w-64 flex flex-col transition-transform duration-300
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:flex
-      `} style={{ background: '#1a1f2e', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+    <>
+      {/* Google Sans Font Import */}
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Google+Sans:opsz,wght@17..18,400..700&display=swap');
+        
+        :root {
+          --font-google-sans: 'Google Sans', sans-serif;
+        }
 
-        <div className="flex items-center gap-3 px-6 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center text-black font-black text-base flex-shrink-0">💪</div>
-          <div>
-            <p className="text-white font-black text-lg leading-none">FitZone</p>
-            <p className="text-xs mt-0.5" style={{ color: '#C8FF00', opacity: 0.7 }}>Admin Panel</p>
-          </div>
-          <button onClick={() => setSidebarOpen(false)} className="ml-auto lg:hidden text-gray-400 hover:text-white">
-            <FiX size={18} />
-          </button>
-        </div>
+        body {
+          font-family: var(--font-google-sans);
+        }
 
-        <nav className="flex-1 overflow-y-auto py-4 px-3">
-          {navGroups.map((group, gi) => (
-            <div key={gi} className={gi > 0 ? 'mt-6' : ''}>
-              {group.label && (
-                <p className="text-xs font-semibold px-3 mb-2 uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                  {group.label}
-                </p>
-              )}
-              <div className="space-y-0.5">
-                {group.items.map(({ href, label, icon: Icon, exact }) => {
-                  const active = exact ? pathname === href : (pathname.startsWith(href) && href !== '/');
-                  return (
-                    <Link key={href} href={href}
-                      onClick={() => setSidebarOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
-                      style={{
-                        background: active ? 'rgba(200,255,0,0.12)' : 'transparent',
-                        color: active ? '#C8FF00' : 'rgba(255,255,255,0.6)',
-                      }}>
-                      <Icon size={18} className="flex-shrink-0" />
-                      <span className="flex-1">{label}</span>
-                      {active && <FiChevronRight size={14} />}
-                    </Link>
-                  );
-                })}
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #ffaa00; }
+      `}</style>
+
+      <div className="min-h-screen bg-[#080808] flex antialiased text-slate-200" style={{ fontFamily: 'var(--font-google-sans)' }}>
+        
+        {/* ── SIDEBAR ── */}
+        <aside className={`
+          fixed top-0 left-0 h-full z-50 w-72 bg-[#111] border-r border-white/5
+          flex flex-col transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0 lg:static lg:flex
+        `}>
+          <div className="p-8">
+            <Link href="/admin" className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <FiActivity size={20} className="text-black" />
               </div>
-            </div>
-          ))}
-        </nav>
-
-        <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
-            <div className="w-9 h-9 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center flex-shrink-0">
-              <span className="text-primary font-black text-sm uppercase">{user?.name?.charAt(0)}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-semibold truncate">{user?.name}</p>
-              <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>Administrator</p>
-            </div>
-            <button onClick={logout} className="text-gray-500 hover:text-red-400 transition-colors flex-shrink-0">
-              <FiLogOut size={16} />
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
-      )}
-
-      {/* MAIN */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 sticky top-0 z-20 shadow-sm">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-500 hover:text-gray-900">
-            <FiMenu size={22} />
-          </button>
-
-          <div className="hidden md:flex items-center gap-2 text-sm">
-            <span className="text-gray-400">Admin</span>
-            {currentPage && (
-              <>
-                <FiChevronRight size={14} className="text-gray-300" />
-                <span className="text-gray-700 font-medium">{currentPage.label}</span>
-              </>
-            )}
-          </div>
-
-          <div className="ml-auto flex items-center gap-3">
-            <button className="relative w-9 h-9 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-100">
-              <FiBell size={18} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
-            </button>
-            <Link href="/admin" className="w-9 h-9 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-100">
-              <FiSettings size={18} />
+              <div>
+                <p className="text-white font-bold text-xl uppercase tracking-tight">FitZone</p>
+                <p className="text-primary text-[10px] uppercase font-bold tracking-widest">Control Panel</p>
+              </div>
             </Link>
-            <div className="flex items-center gap-2 pl-3 border-l border-gray-200">
-              <div className="w-9 h-9 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center">
-                <span className="text-primary font-black text-sm uppercase">{user?.name?.charAt(0)}</span>
+          </div>
+
+          <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+            <p className="px-4 text-[10px] uppercase text-white/20 font-bold mb-4 tracking-widest">Management</p>
+            {navItems.map(({ href, label, icon: Icon, exact }) => {
+              const active = exact ? pathname === href : pathname.startsWith(href);
+              return (
+                <Link key={href} href={href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm transition-all rounded-xl border ${
+                    active
+                      ? 'bg-primary/10 text-primary border-primary/20 font-bold'
+                      : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
+                  }`}>
+                  <Icon size={18} />
+                  <span>{label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="p-6 border-t border-white/5">
+            <div className="bg-[#181818] rounded-2xl p-4 border border-white/5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold border border-primary/20">
+                  {user?.name?.charAt(0)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm truncate font-bold">{user?.name}</p>
+                  <p className="text-white/20 text-[9px] uppercase font-bold tracking-tighter">System Admin</p>
+                </div>
               </div>
-              <div className="hidden md:block">
-                <p className="text-gray-800 text-sm font-semibold leading-none">{user?.name}</p>
-                <p className="text-gray-400 text-xs mt-0.5">Admin</p>
-              </div>
+              <button 
+                onClick={logout} 
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all rounded-lg text-[10px] font-bold uppercase"
+              >
+                <FiLogOut size={14} /> Logout Session
+              </button>
             </div>
           </div>
-        </header>
+        </aside>
 
-        <main className="flex-1 overflow-auto p-6">
-          {children}
-        </main>
+        {/* ── MAIN CONTENT ── */}
+        <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+          <header className="h-20 bg-[#080808] border-b border-white/5 px-8 flex items-center justify-between z-40">
+            <button 
+              onClick={() => setSidebarOpen(!sidebarOpen)} 
+              className="lg:hidden text-white/50 p-2 bg-white/5 rounded-lg"
+            >
+              {sidebarOpen ? <FiX size={22} /> : <FiMenu size={22} />}
+            </button>
+            
+            <div className="flex items-center gap-4 ml-auto">
+              <Link 
+                href="/" 
+                target="_blank" 
+                className="text-[10px] font-bold text-white/40 hover:text-primary transition-all border border-white/10 px-4 py-2 rounded-lg uppercase tracking-widest"
+              >
+                View Site <FiExternalLink size={12} className="inline ml-1" />
+              </Link>
+              <div className="w-px h-6 bg-white/10 mx-1" />
+              <button className="p-2 text-white/50 bg-white/5 rounded-lg relative">
+                <FiBell size={20} />
+                <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-primary rounded-full" />
+              </button>
+            </div>
+          </header>
+
+          <main className="flex-1 p-8 overflow-y-auto">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
