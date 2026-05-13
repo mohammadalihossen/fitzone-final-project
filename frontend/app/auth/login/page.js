@@ -20,11 +20,10 @@ export default function LoginPage() {
     const result = await login(form);
     if (result.success) {
       toast.success('Welcome back! 💪');
-      const currentUser = useAuthStore.getState().user;
-      if (currentUser?.role === 'admin') {
+      if (result.user?.role === 'admin') {
         router.push('/admin');
       } else {
-        router.push(redirect === '/' ? '/dashboard' : redirect);
+        router.push('/dashboard');
       }
     } else {
       toast.error(result.error);

@@ -17,7 +17,7 @@ const useAuthStore = create(
           const data = await authAPI.login(credentials);
           Cookies.set('fitzone_token', data.token, { expires: 7 });
           set({ user: data.user, token: data.token, isAuthenticated: true, isLoading: false });
-          return { success: true };
+          return { success: true, user: data.user };
         } catch (error) {
           set({ isLoading: false });
           return { success: false, error: error.message };
@@ -30,7 +30,7 @@ const useAuthStore = create(
           const data = await authAPI.register(userData);
           Cookies.set('fitzone_token', data.token, { expires: 7 });
           set({ user: data.user, token: data.token, isAuthenticated: true, isLoading: false });
-          return { success: true };
+          return { success: true, user: data.user };
         } catch (error) {
           set({ isLoading: false });
           return { success: false, error: error.message };
