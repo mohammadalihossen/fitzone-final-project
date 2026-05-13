@@ -1,12 +1,13 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import useAuthStore from "@/store/authStore";
 import { toast } from "react-hot-toast";
 import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from "react-icons/fi";
 
-export default function LoginPage() {
+// ✅ useSearchParams আলাদা component-এ
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
@@ -197,5 +198,18 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ✅ Suspense দিয়ে wrap করা — Vercel deploy এর জন্য জরুরি
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }
