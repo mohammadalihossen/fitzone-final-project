@@ -1,14 +1,12 @@
 import Link from 'next/link';
-import { FiInstagram, FiFacebook, FiYoutube, FiTwitter, FiMapPin, FiPhone, FiMail } from 'react-icons/fi';
+import { FiInstagram, FiFacebook, FiYoutube, FiTwitter } from 'react-icons/fi';
 
 export default function Footer() {
   return (
     <footer className="bg-dark border-t border-border">
       <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
-       
         <div className="grid grid-cols-2 md:grid-cols-5 gap-10">
-          
-         
+
           <div className="col-span-2 flex flex-col items-center md:items-start text-center md:text-left mb-4 md:mb-0">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-black text-sm font-black">💪</div>
@@ -26,7 +24,6 @@ export default function Footer() {
             </div>
           </div>
 
-         
           <div className="text-left">
             <h4 className="font-bold uppercase text-[10px] tracking-[0.2em] text-white mb-5">Shop</h4>
             <ul className="space-y-3">
@@ -38,7 +35,6 @@ export default function Footer() {
             </ul>
           </div>
 
-         
           <div className="text-left">
             <h4 className="font-bold uppercase text-[10px] tracking-[0.2em] text-white mb-5">Support</h4>
             <ul className="space-y-3">
@@ -55,7 +51,6 @@ export default function Footer() {
             </ul>
           </div>
 
-         
           <div className="text-left">
             <h4 className="font-bold uppercase text-[10px] tracking-[0.2em] text-white mb-5">Company</h4>
             <ul className="space-y-3">
@@ -74,17 +69,29 @@ export default function Footer() {
         </div>
       </div>
 
-     
       <div className="border-t border-border py-8 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-muted text-[9px] uppercase tracking-[0.2em] order-2 md:order-1 text-center md:text-left">
             © 2026 FitZone. All rights reserved.
           </p>
+
           <div className="flex gap-6 order-1 md:order-2">
             <Link href="/terms" className="text-muted text-[9px] hover:text-primary transition-colors uppercase tracking-[0.2em]">Terms</Link>
             <Link href="/privacy" className="text-muted text-[9px] hover:text-primary transition-colors uppercase tracking-[0.2em]">Privacy</Link>
             <Link href="/cookies" className="text-muted text-[9px] hover:text-primary transition-colors uppercase tracking-[0.2em]">Cookies</Link>
           </div>
+
+          <p className="text-muted text-[9px] uppercase tracking-[0.2em] order-3 text-center md:text-right">
+            Designed & Developed by{" "}
+            
+              href="https://www.facebook.com/share/1B41AA62fk/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline font-semibold transition-colors"
+            >
+              MOHAMMAD ALI
+            </a>
+          </p>
         </div>
       </div>
     </footer>
