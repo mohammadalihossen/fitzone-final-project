@@ -8,7 +8,7 @@ export default function OfferPopup() {
   const [timeLeft, setTimeLeft] = useState({ hours: 2, minutes: 30, seconds: 0 });
 
   useEffect(() => {
-    // ৩ সেকেন্ড পর popup দেখাবে
+    
     const timer = setTimeout(() => {
       const dismissed = sessionStorage.getItem('offer_dismissed');
       if (!dismissed) setShow(true);
@@ -42,7 +42,7 @@ export default function OfferPopup() {
 
   return (
     <>
-      {/* Backdrop: এখানে ক্লিক করলে পপআপ ক্লোজ হবে */}
+     
       <div
         className="fixed inset-0 z-50 transition-opacity duration-300"
         style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
@@ -69,7 +69,7 @@ export default function OfferPopup() {
           <div className="absolute top-0 left-0 right-0 h-px"
             style={{ background: 'linear-gradient(90deg, transparent, #C8FF00, transparent)' }} />
 
-          {/* Close button: Cross চিহ্ন দিলে পপআপ চলে যাবে */}
+         
           <button 
             onClick={handleClose}
             className="absolute top-3 right-3 sm:top-5 sm:right-5 z-20 w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-white transition-all active:scale-90"
