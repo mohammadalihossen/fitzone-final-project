@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { FiInstagram, FiFacebook, FiYoutube, FiTwitter } from 'react-icons/fi';
 
 export default function Footer() {
   return (
