@@ -12,7 +12,7 @@ export default function OfferPopup() {
     const timer = setTimeout(() => {
       const dismissed = sessionStorage.getItem('offer_dismissed');
       if (!dismissed) setShow(true);
-    }, 3000);
+    }, 6000);
     return () => clearTimeout(timer);
   }, []);
 
