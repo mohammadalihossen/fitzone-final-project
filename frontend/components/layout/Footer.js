@@ -81,6 +81,7 @@ export default function Footer() {
             <Link href="/cookies" className="text-muted text-[9px] hover:text-primary transition-colors uppercase tracking-[0.2em]">Cookies</Link>
           </div>
 
+                
           <p className="text-muted text-[9px] uppercase tracking-[0.2em] order-3 text-center md:text-right">
             Designed & Developed by{" "}
             
